@@ -97,6 +97,66 @@ handle_dichotomic <- function(data) {
 
 }
 
+#' Is an ENIGH variable an ignore type?
+#'
+#' @param x A vector
+#'
+#' @export
+#'
+#' @return TRUE if `x` is an ignore type variable (values 1, 2, 9)
+#'
+#' @examples
+#' is_ignores(c("1", "2", "9"))
+#' is_ignores(c("1", "2", "3"))
+#' is_ignores(c("1", "2"))
+is_ignores <- function(x) {
+  if (is(x, "factor") | is(x, "logical") | is(x, "numeric")) {
+    return(FALSE)
+  }
+
+  vec_uniq <- x |>
+    # Remove NA's
+    na.omit() |>
+    unique() |>
+    sort()
+
+  if (length(vec_uniq) > 3) {
+    return(FALSE)
+  }
+
+  if(length(vec_uniq) == 2) {
+    if(all(vec_uniq == c("1", "2")) | all(vec_uniq == c("1", "9")) | all(vec_uniq == c("2", "9"))) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  } else {
+    return(all(vec_uniq == c("1", "2", "9")))
+  }
+
+}
+
+#' Adds factor labels to ignore type variables in ENIGH data sets
+#'
+#' @param data An ENIGH data set in tibble format.
+#'
+#' @return A tibble with labelled ignore type variables.
+#' @export
+handle_ignores <- function(data) {
+  data |>
+    dplyr::mutate(dplyr::across(
+      .cols = tidyselect::where(is_ignores) &
+        !tidyselect::matches("sexo|_hog|folio|numren"),
+      ~ factor(
+        .x,
+        labels = c("S\\u00ed", "No", "No sabe") |>
+          stringi::stri_unescape_unicode(),
+        levels = c(1, 2, 9)
+      )
+    ))
+
+}
+
 
 #' Does a vector contain alphabetic characters?
 #'

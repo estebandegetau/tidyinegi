@@ -17,4 +17,18 @@ test_that("is_single_value", {
 
 })
 
+test_that("is_ignores works", {
+  expect_equal(is_ignores(c("1", "2", "9")), TRUE)
+  expect_equal(is_ignores(c("1", "2", "3")), FALSE)
+  expect_equal(is_ignores(c("1", "2")), TRUE)
+  expect_equal(is_ignores(c("1", "9")), TRUE)
+  expect_equal(is_ignores(c("2", "9")), TRUE)
+  expect_equal(is_ignores(c(NA, "1", "2", "9")), TRUE)
+  expect_equal(is_ignores(c(NA, "1")), FALSE)
+  expect_equal(is_ignores(c(NA)), FALSE)
+  expect_equal(is_ignores(c("0", "1", "2")), FALSE)
+})
+
+
+
 
